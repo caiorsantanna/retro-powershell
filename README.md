@@ -5,6 +5,8 @@ fósforo verde desgastado), banner de boot do **RETROSHELL UNIFIED OPERATING SYS
 com som de inicialização e spinner à moda antiga, prompt oh-my-posh temático e som
 de teclado mecânico **IBM Model F XT (1981)** em todo o Windows via Mechvibes.
 
+![O terminal logo após o boot: banner centralizado, spinner concluído e prompt de duas linhas, tudo sob o shader CRT](docs/screenshot.png)
+
 ## Requisitos
 
 | O quê | Como instalar | Para quê |
