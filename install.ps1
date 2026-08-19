@@ -112,11 +112,13 @@ if (Test-Path $mechvibesExe) {
     Copy-Item "$repo\mechvibes\model-f-xt\*" $mvCustom -Force
     Set-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' `
         -Name 'Mechvibes' -Value "`"$mechvibesExe`""
-    $proc = Get-Process mechvibes -ErrorAction SilentlyContinue
-    if ($proc) {
-        # reinicia p/ enxergar o pack (a pasta custom so e lida no boot do app)
-        $proc | Stop-Process -Force; Start-Sleep -Milliseconds 800
-        Start-Process $mechvibesExe
+    # NAO iniciar o Mechvibes daqui: processo filho do console morre junto com o
+    # terminal. Abrir/reabrir e passo manual (a pasta custom so e lida no boot
+    # do app, entao um Mechvibes ja aberto precisa ser fechado e reaberto).
+    if (Get-Process mechvibes -ErrorAction SilentlyContinue) {
+        Warn 'Mechvibes esta aberto: feche e abra de novo para ele enxergar o pack.'
+    } else {
+        Warn 'Abra o Mechvibes manualmente (menu Iniciar) para ativar o pack.'
     }
 }
 
@@ -125,7 +127,8 @@ Step 'Pronto! Passos manuais que restam:'
 Write-Host @'
   1. Abra uma aba nova do Windows Terminal (profile RetroShell) e curta o boot.
      - Enter durante o spinner pula o boot com fade-out.
-  2. No Mechvibes (icone na bandeja), selecione o pack "Model_F_XT" e ajuste o volume.
+  2. Abra o Mechvibes pelo menu Iniciar (se ja estava aberto, feche e abra de novo)
+     e selecione o pack "Model_F_XT" na interface; ajuste o volume ali.
   3. Se o prompt aparecer sem icones/glifos, instale a fonte:  oh-my-posh font install meslo
      (e confira se o profile RetroShell esta usando "MesloLGM Nerd Font").
 
