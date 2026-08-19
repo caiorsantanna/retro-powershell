@@ -1,0 +1,23 @@
+{
+  "name": "Fallout",
+  "background": "#000000",
+  "foreground": "#4DFF88",
+  "cursorColor": "#8FFFB5",
+  "selectionBackground": "#2E6B3C",
+  "black": "#0A0D0A",
+  "red": "#FF5C47",
+  "green": "#4DFF88",
+  "yellow": "#FFD24A",
+  "blue": "#2F7DBF",
+  "purple": "#C9A8FF",
+  "cyan": "#7FE8E0",
+  "white": "#E8F5EA",
+  "brightBlack": "#5E8268",
+  "brightRed": "#FF8A73",
+  "brightGreen": "#8FFFB5",
+  "brightYellow": "#FFE58A",
+  "brightBlue": "#8FDDF5",
+  "brightPurple": "#DCC5FF",
+  "brightCyan": "#A8F5EF",
+  "brightWhite": "#FFFFFF"
+}

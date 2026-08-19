@@ -1,0 +1,10 @@
+{
+  "guid": "{7a1b5e0d-3c94-4f6a-b7e2-08c15d9f4210}",
+  "name": "TALKOS",
+  "commandline": "pwsh.exe -NoLogo",
+  "icon": "ms-appx:///ProfileIcons/{574e775e-4f2a-5b96-ac1e-a2962a402336}.png",
+  "colorScheme": "Fallout",
+  "cursorShape": "filledBox",
+  "experimental.pixelShaderPath": "C:\\Users\\caio.santanna\\crt-fisheye.hlsl",
+  "padding": "12, 32, 12, 32"
+}
