@@ -73,10 +73,10 @@ if (-not (Test-Path $wt)) {
     if ($null -eq $s.schemes) { $s | Add-Member -NotePropertyName schemes -NotePropertyValue @() -Force }
     if (-not ($s.schemes | Where-Object name -eq $scheme.name)) { $s.schemes = @($s.schemes) + $scheme }
 
-    # profile TALKOS (substitui por guid se ja existir; shader aponta p/ o $HOME local)
-    $talkos = Get-Content "$repo\terminal\talkos-profile.json" -Raw | ConvertFrom-Json
-    $talkos.'experimental.pixelShaderPath' = "$HOME\crt-fisheye.hlsl"
-    $s.profiles.list = @($s.profiles.list | Where-Object guid -ne $talkos.guid) + $talkos
+    # profile RetroShell (substitui por guid se ja existir; shader aponta p/ o $HOME local)
+    $retro = Get-Content "$repo\terminal\retroshell-profile.json" -Raw | ConvertFrom-Json
+    $retro.'experimental.pixelShaderPath' = "$HOME\crt-fisheye.hlsl"
+    $s.profiles.list = @($s.profiles.list | Where-Object guid -ne $retro.guid) + $retro
 
     # fonte padrao dos profiles (a MesloLGM precisa estar instalada)
     if ($null -eq $s.profiles.defaults) {
@@ -87,8 +87,8 @@ if (-not (Test-Path $wt)) {
             -NotePropertyValue ([pscustomobject]@{ face = 'MesloLGM Nerd Font' }) -Force
     }
 
-    # launch: TALKOS como default, maximizado, no monitor secundario se houver
-    $s.defaultProfile = $talkos.guid
+    # launch: RetroShell como default, maximizado, no monitor secundario se houver
+    $s.defaultProfile = $retro.guid
     $s | Add-Member -NotePropertyName launchMode -NotePropertyValue 'maximized' -Force
     Add-Type -AssemblyName System.Windows.Forms
     $second = [System.Windows.Forms.Screen]::AllScreens | Where-Object { -not $_.Primary } | Select-Object -First 1
@@ -123,11 +123,11 @@ if (Test-Path $mechvibesExe) {
 # ---------------------------------------------------------------------- resumo
 Step 'Pronto! Passos manuais que restam:'
 Write-Host @'
-  1. Abra uma aba nova do Windows Terminal (profile TALKOS) e curta o boot.
+  1. Abra uma aba nova do Windows Terminal (profile RetroShell) e curta o boot.
      - Enter durante o spinner pula o boot com fade-out.
   2. No Mechvibes (icone na bandeja), selecione o pack "Model_F_XT" e ajuste o volume.
   3. Se o prompt aparecer sem icones/glifos, instale a fonte:  oh-my-posh font install meslo
-     (e confira se o profile TALKOS esta usando "MesloLGM Nerd Font").
+     (e confira se o profile RetroShell esta usando "MesloLGM Nerd Font").
 
   Rollback: os backups ficam ao lado dos originais com sufixo .bak-retro.
 '@

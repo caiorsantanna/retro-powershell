@@ -19,8 +19,8 @@ $PSStyle.FileInfo.Directory = $PSStyle.Foreground.BrightBlue + $PSStyle.Bold
 # e o aviso de update; a mensagem de tempo de load some via -NoLogo no Terminal.
 Clear-Host
 $bootLines = @(
-    'TALK COMMUNICATIONS UNIFIED OPERATING SYSTEM'
-    'COPYRIGHT 2075-2077 TALK COMMUNICATIONS'
+    'RETROSHELL UNIFIED OPERATING SYSTEM'
+    'COPYRIGHT 2075-2077 RETROSHELL INDUSTRIES'
     "-SERVER $env:COMPUTERNAME-"
 )
 $bootWidth = $Host.UI.RawUI.WindowSize.Width
@@ -163,10 +163,10 @@ if ($global:__bootSnd) {
             $global:__bootSnd.Stop()
             break
         }
-        [Console]::Write("`r  INITIALIZING TALKLINK PROTOCOL... $($spin[$i++ % 4]) ")
+        [Console]::Write("`r  INITIALIZING TERMLINK PROTOCOL... $($spin[$i++ % 4]) ")
         Start-Sleep -Milliseconds 80
     }
-    [Console]::Write("`r  INITIALIZING TALKLINK PROTOCOL... OK`n`n")
+    [Console]::Write("`r  INITIALIZING TERMLINK PROTOCOL... OK`n`n")
     $global:__bootSnd.Close()
     Remove-Variable -Scope Global -Name __bootSnd -ErrorAction SilentlyContinue
     Remove-Variable spin, i, t0 -ErrorAction SilentlyContinue

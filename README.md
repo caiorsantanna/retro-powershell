@@ -1,9 +1,9 @@
 # retro-powershell
 
 PowerShell com cara de terminal Fallout: shader CRT (curvatura de tubo, scanlines,
-fósforo verde desgastado), banner de boot da **TALK COMMUNICATIONS UNIFIED OPERATING
-SYSTEM** com som de inicialização e spinner à moda antiga, prompt oh-my-posh temático
-e som de teclado mecânico **IBM Model F XT (1981)** em todo o Windows via Mechvibes.
+fósforo verde desgastado), banner de boot do **RETROSHELL UNIFIED OPERATING SYSTEM**
+com som de inicialização e spinner à moda antiga, prompt oh-my-posh temático e som
+de teclado mecânico **IBM Model F XT (1981)** em todo o Windows via Mechvibes.
 
 ## Requisitos
 
@@ -12,7 +12,7 @@ e som de teclado mecânico **IBM Model F XT (1981)** em todo o Windows via Mechv
 | [oh-my-posh](https://ohmyposh.dev) | `winget install JanDeDobbeleer.OhMyPosh` | o prompt temático |
 | [Mechvibes](https://mechvibes.com) | baixar e instalar pelo site (o instalador não roda silencioso via winget) | som de teclas global, em qualquer app |
 | PowerShell 7+ | `winget install Microsoft.PowerShell` | o profile usa recursos do pwsh |
-| Windows Terminal | já vem no Windows 11 | shader CRT e profile TALKOS |
+| Windows Terminal | já vem no Windows 11 | shader CRT e profile RetroShell |
 | MesloLGM Nerd Font | `oh-my-posh font install meslo` | glifos do prompt |
 
 ## Instalação
@@ -30,7 +30,7 @@ O instalador é **idempotente** (rode de novo após um `git pull` para atualizar
 2. Copia o shader `crt-fisheye.hlsl` e o tema `fallout.omp.json` para `~`;
 3. Instala o profile do PowerShell (`$PROFILE`);
 4. Faz *merge* no `settings.json` do Windows Terminal: adiciona o scheme **Fallout**
-   e o profile **TALKOS** (com `-NoLogo`), define-o como default, maximizado, no
+   e o profile **RetroShell** (com `-NoLogo`), define-o como default, maximizado, no
    monitor secundário **se houver um conectado** (detectado na hora);
 5. Instala o soundpack **Model F XT** na pasta custom do Mechvibes e registra o
    Mechvibes para iniciar com o Windows.
@@ -47,7 +47,7 @@ profile/    Microsoft.PowerShell_profile.ps1 — banner, boot com som + spinner
 theme/      fallout.omp.json — prompt verde-fósforo de duas linhas
 shader/     crt-fisheye.hlsl — barril geométrico, scanlines, vinheta, fundo de
             fósforo desgastado (knobs comentados no topo do arquivo)
-terminal/   scheme Fallout + profile TALKOS (fragmentos que o installer mescla)
+terminal/   scheme Fallout + profile RetroShell (fragmentos que o installer mescla)
 sounds/     key<scancode>.wav (50 teclas fatiadas do pack) + boot.wav
 mechvibes/  o pack Model F XT pronto pra pasta custom do Mechvibes
 ```
