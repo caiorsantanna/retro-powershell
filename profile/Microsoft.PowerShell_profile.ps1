@@ -18,6 +18,80 @@ $PSStyle.FileInfo.Directory = $PSStyle.Foreground.BrightBlue + $PSStyle.Bold
 # Banner de boot estilo Fallout. O Clear-Host apaga o banner de versao do pwsh
 # e o aviso de update; a mensagem de tempo de load some via -NoLogo no Terminal.
 Clear-Host
+
+# Ligacao do tubo: antes do banner, a tela nasce preta, uma linha fina acende no
+# meio e se abre na vertical, como o power-on de um CRT. Sao as duas frentes de
+# varredura que se afastam; o miolo atras delas continua preto.
+# Por que isto vive no profile e nao no shader: um pixel shader do Windows
+# Terminal nao tem como saber que a sessao comecou. O uniform Time e um relogio
+# GLOBAL, que abas novas herdam ja correndo — nao um cronometro por aba (medido
+# na marra: uma regua de Time desenhada na tela nao reinicia ao abrir aba nova).
+# Quem sabe a hora do inicio e este arquivo, que E o codigo que roda quando a
+# aba abre. E como a tela esta vazia nesse instante, desenhar a faixa em texto e
+# visualmente equivalente a comprimir a imagem: nao ha imagem. O shader ainda
+# aplica halo de fosforo, scanlines e curvatura por cima, entao o brilho do tubo
+# sai de graca.
+if (-not [Console]::IsOutputRedirected -and
+    $Host.UI.RawUI.WindowSize.Height -ge 8) {
+    # SetCursorPosition usa coordenadas do BUFFER, nao da janela; com scrollback
+    # os dois nao coincidem, entao tudo e ancorado no cursor pos-Clear-Host
+    $tubeTop = [Console]::CursorTop
+    $tubeBot = [Math]::Min($tubeTop + $Host.UI.RawUI.WindowSize.Height - 1,
+                           [Console]::BufferHeight - 1)
+    $tubeMid = [int](($tubeTop + $tubeBot) / 2)
+    # -1 na largura: escrever na ultima celula da linha rolaria a tela
+    $tubeBar = ([string][char]0x2588) * ($Host.UI.RawUI.WindowSize.Width - 1)
+    $tubeGap = ' ' * ($Host.UI.RawUI.WindowSize.Width - 1)  # apaga a borda antiga
+    $tubeSteps = 14
+    [Console]::CursorVisible = $false
+
+    # o filamento: uma linha so, o ponto mais quente do ciclo
+    [Console]::ForegroundColor = [ConsoleColor]::White
+    [Console]::SetCursorPosition(0, $tubeMid)
+    [Console]::Write($tubeBar)
+    Start-Sleep -Milliseconds 130
+
+    # Abertura vertical. O que se move sao as duas FRENTES DE VARREDURA, nao uma
+    # faixa preenchida: cada passo apaga as bordas antigas e redesenha nas novas
+    # posicoes, entao atras delas fica preto. E o que um tubo faz de verdade —
+    # preencher solido acenderia a tela inteira no meio da animacao, que e o
+    # oposto de "nasce preto e vai abrindo".
+    # O expoente 0.65 abre depressa no inicio e assenta no fim.
+    $tubePrev = 0
+    for ($tubeI = 1; $tubeI -le $tubeSteps; $tubeI++) {
+        # o alcance usa a MAIOR das duas metades: com altura par a metade de
+        # baixo tem uma linha a mais, e medir so pela de cima faria a borda
+        # inferior parar antes da ultima linha. Os limites adiante aparam o resto
+        $tubeReach = [int][Math]::Round(
+            [Math]::Max($tubeMid - $tubeTop, $tubeBot - $tubeMid) *
+            [Math]::Pow($tubeI / $tubeSteps, 0.65))
+        if ($tubeReach -gt $tubePrev) {
+            # apaga onde as bordas estavam (no 1o passo, o proprio filamento)
+            foreach ($tubeR in ($tubeMid - $tubePrev), ($tubeMid + $tubePrev)) {
+                if ($tubeR -ge $tubeTop -and $tubeR -le $tubeBot) {
+                    [Console]::SetCursorPosition(0, $tubeR)
+                    [Console]::Write($tubeGap)
+                }
+            }
+            # redesenha nas novas; borda que ja saiu da tela simplesmente some
+            foreach ($tubeR in ($tubeMid - $tubeReach), ($tubeMid + $tubeReach)) {
+                if ($tubeR -ge $tubeTop -and $tubeR -le $tubeBot) {
+                    [Console]::SetCursorPosition(0, $tubeR)
+                    [Console]::Write($tubeBar)
+                }
+            }
+            $tubePrev = $tubeReach
+        }
+        Start-Sleep -Milliseconds 26
+    }
+    Start-Sleep -Milliseconds 70
+    [Console]::ResetColor()
+    [Console]::CursorVisible = $true
+    Clear-Host
+    Remove-Variable tubeTop, tubeBot, tubeMid, tubeBar, tubeGap, tubeSteps,
+                    tubePrev, tubeI, tubeReach, tubeR -ErrorAction SilentlyContinue
+}
+
 $bootLines = @(
     'RETROSHELL UNIFIED OPERATING SYSTEM'
     'COPYRIGHT 2075-2077 RETROSHELL INDUSTRIES'
