@@ -1,5 +1,6 @@
 // CRT fisheye para Windows Terminal — barril geometrico, vidro com cantos
-// arredondados, padding verde interno, scanlines, glow de fosforo e vinheta.
+// arredondados, padding verde interno, scanlines, glow de fosforo, vinheta e
+// reflexo de sala na face externa do vidro.
 // ATENCAO ao trade-off: o hit-test do mouse usa o grid plano e nao enxerga o
 // shader, entao o warp desloca a selecao em ate ~CURVATURE x meia-tela nas
 // bordas. Com CURVATURE ~0.015 o desvio fica abaixo de meia linha (toleravel);
@@ -77,6 +78,53 @@ cbuffer PixelShaderSettings {
 #define BARANGLE  3.0  // inclinacao da diagonal EM GRAUS (0 = horizontal). Em
                        // graus de verdade: a conversao usa Resolution, entao o
                        // angulo nao muda quando voce redimensiona a janela
+
+// (3) Reflexo do vidro: o VERNIZ do tubo, como em mockup de TV retro — um
+// lencol de brilho cobrindo a parte superior do vidro, cuja borda inferior
+// desenha um arco suave abaulado p/ baixo. Nao e a imagem de uma luminaria
+// (esse caminho foi tentado e le como mancha): e o brilho da propria
+// SUPERFICIE curva, entao ele segue a forma do vidro — dai a borda em domo,
+// espelhando o bojo do tubo — e cobre conteudo sem cerimonia, igual nos
+// mockups. Duas coisas o separam dos efeitos acima. (a) Usa tex, a coordenada
+// do vidro, e nao uv: nao warpa com o barril e NAO treme junto com o jitter —
+// e esse descolamento que denuncia um plano de vidro na frente do conteudo.
+// (b) E somado DEPOIS das scanlines e da vinheta, porque nao e fosforo aceso:
+// nao ha feixe de varredura atravessando um reflexo. E o oposto do BGBLOB e
+// da barra, que entram antes justamente por serem luz nascida dentro do tubo.
+#define REFLGAIN  0.06   // forca do verniz (0 desliga). E um efeito de AREA
+                         // GRANDE e diluido pela largura: em janela ultrawide
+                         // o mesmo ganho rende bem menos que em 16:9 (0.09
+                         // sumia numa 21:9). Calibrado em simulacao offline
+#define REFLDIP   0.42   // ate onde o lencol desce no ponto mais fundo do
+                         // arco (fracao da altura da tela)
+#define REFLBOW   0.22   // abaulamento da borda: quanto o arco sobe do centro
+                         // p/ as laterais (0 = borda reta). E o que espelha o
+                         // bojo do tubo
+#define REFLTILT  0.05   // inclinacao da borda: positivo desce mais fundo a
+                         // ESQUERDA, como nos mockups (a luz nunca vem
+                         // perfeitamente de frente); 0 = simetrico
+#define REFLFEATHER 0.045 // meia-altura da transicao na borda (fracao da
+                         // altura): pequena = verniz recortado de mockup,
+                         // grande = esfumado
+#define REFLFLOOR 0.55   // brilho na borda inferior, relativo ao do topo
+                         // (0..1): o lencol e mais forte no alto do bojo e
+                         // esvai ao descer
+#define REFLSH0   0.15   // fracao da meia-largura onde o verniz NASCE (0 =
+                         // centro da tela; 1 = borda). Abaixo disso: nada
+#define REFLSH1   0.55   // onde o verniz chega CHEIO. Entre SH0 e SH1 ele
+                         // cresce suave — sao os OMBROS do tubo: o vidro
+                         // curvo pega luz nas quinas, nunca de frente, e o
+                         // texto (que vive no meio) fica 100% fora do veu
+#define REFLTINT  float3(0.90, 0.97, 1.0) // branco levemente frio. Reflete na
+                         // face externa e nunca passou pelo fosforo, entao nao
+                         // e verde — e esse contraste de materia que faz o
+                         // verniz ler como VIDRO na frente, nao tela acesa
+// Calibragem do reflexo: 1 multiplica o ganho por 4 p/ enxergar bem o arco da
+// borda e o alcance. O verniz e estatico, entao nao ha o que congelar — so o
+// que levantar. Mesmo ciclo dos outros: mude aqui, rode install.ps1, abra aba
+// nova. Commite sempre com 0.
+#define REFLCAL   0
+
 // Calibragem: 1 congela a barra no meio da tela e trava a tremida ligada, p/
 // ajustar amplitude com a imagem parada; 2 encurta MUITO os intervalos, p/ ver
 // os dois acontecerem sem esperar. O WT nao recarrega .hlsl em disco: mude
@@ -273,6 +321,35 @@ float4 main(float4 pos : SV_POSITION, float2 tex : TEXCOORD) : SV_TARGET
 
     // vinheta: cantos mais fundos, como vidro curvo
     color.rgb *= 1.0 - VIGNETTE * r2;
+
+    // (3) Reflexo do vidro — ultima camada, ja fora do tubo: nada aqui usa uv,
+    // porque isto e a superficie do vidro e nao a imagem projetada atras dela.
+    // Sem fade junto a moldura: o verniz encosta nela, e o corte do vidro com
+    // cantos arredondados apara o que passar, como a moldura real.
+    if (REFLGAIN > 0.0) // literal: o compilador dobra isso, REFLGAIN 0 nao custa
+    {
+        // borda inferior do lencol: parabola abaulada p/ baixo + inclinacao.
+        // Em tex puro, SEM correcao de aspecto, de proposito: o verniz segue a
+        // proporcao do vidro (como o desenho de um mockup), nao uma forma
+        // fisica redonda — esticar a janela estica o verniz junto
+        float t  = tex.x * 2.0 - 1.0;                // -1 (esq) .. +1 (dir)
+        float yb = REFLDIP - REFLBOW * t * t - REFLTILT * t;
+
+        // 1 acima da borda, 0 abaixo, com transicao macia de 2*REFLFEATHER
+        float refl = 1.0 - smoothstep(yb - REFLFEATHER, yb + REFLFEATHER, tex.y);
+
+        // esvai ao descer: pleno no topo do bojo, REFLFLOOR junto a borda
+        refl *= lerp(1.0, REFLFLOOR, saturate(tex.y / max(yb, 1e-4)));
+
+        // so os ombros: t ja e -1..+1, abs(t) e a distancia ao centro. No
+        // miolo (abs < SH0) o verniz e ZERO — nenhum veu sobre o texto —
+        // e ele nasce suave dali ate encher nas quinas superiores
+        refl *= smoothstep(REFLSH0, REFLSH1, abs(t));
+#if REFLCAL
+        refl *= 4.0;                                 // calibragem: arco visivel
+#endif
+        color.rgb += refl * REFLGAIN * REFLTINT;
+    }
 
     color.a = 1.0;
     return color;

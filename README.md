@@ -6,7 +6,9 @@ com som de inicialização e spinner à moda antiga, prompt oh-my-posh temático
 de teclado mecânico **IBM Model F XT (1981)** em todo o Windows via Mechvibes.
 O tubo acende antes do banner, e de vez em quando falha: o texto dá uma tremida
 seca, e a cada tanto uma faixa de estática sobe devagar pela tela, como monitor
-velho com mau contato.
+velho com mau contato. E o vidro tem verniz: um brilho frio cobre
+só os ombros do tubo — o centro, onde o texto vive, fica fora do véu — com a borda
+desenhando o arco do bojo. Parado: quando o texto treme, ele não treme junto.
 
 ![O terminal logo após o boot: banner centralizado, spinner concluído e prompt de duas linhas, tudo sob o shader CRT](docs/screenshot.png)
 
@@ -52,8 +54,8 @@ profile/    Microsoft.PowerShell_profile.ps1 — power-on do tubo, banner, boot
             (desligado por padrão; Enable-KeyClick liga)
 theme/      fallout.omp.json — prompt verde-fósforo de duas linhas
 shader/     crt-fisheye.hlsl — barril geométrico, scanlines com deriva, vinheta,
-            fundo de fósforo desgastado, tremida de sincronismo e barra de
-            zumbido (knobs comentados no topo do arquivo)
+            fundo de fósforo desgastado, tremida de sincronismo, barra de zumbido
+            e verniz de vidro à la mockup de TV retrô (knobs comentados no topo)
 terminal/   scheme Fallout + profile RetroShell (fragmentos que o installer mescla)
 sounds/     key<scancode>.wav (50 teclas fatiadas do pack) + boot.wav
 mechvibes/  o pack Model F XT pronto pra pasta custom do Mechvibes
